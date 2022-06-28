@@ -1,0 +1,12 @@
+$primary-color: white;
+$secondary-color: black;
+
+body{
+    color: $primary-color;
+    background: $secondary-color;
+    filter: blur();
+    a{
+        text-decoration: none;
+        color: $primary-color;
+    }
+}
