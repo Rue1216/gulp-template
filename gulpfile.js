@@ -35,7 +35,7 @@ console.log(options)
 
 //clean the public folder
 gulp.task('clean', function () {
-  return gulp.src('./public', {read: false})
+  return gulp.src('./public', {read: false, allowEmpty: true})
       .pipe(clean());
 });
 
@@ -46,8 +46,7 @@ gulp.task('clean', function () {
 
 gulp.task('jade', function() {
     // var YOUR_LOCALS = {};
-   
-    gulp.src('./source/**/*.jade')
+    return gulp.src('./source/**/*.jade')
       .pipe(plumber())
       .pipe(jade({
         pretty: true,
@@ -110,14 +109,26 @@ gulp.task('watch', function () {
   });
 
 
-//一次進行多個任務
+//default mode
 gulp.task('default',
   gulp.series(
     'clean',
-    'jade', 
-    'sass', 
-    'babel', 
-    gulp.parallel('browser-sync', 'watch')
+    gulp.parallel('jade','sass','babel'),
+    function(done){
+      // browser sync
+      browserSync.init({
+        server:{
+          baseDir:'./public'
+        },
+        // 重新整理的間隔時間必須超過兩秒
+        reloadDebounce: 2000
+      })
+      // watch
+      gulp.watch('./source/scss/**/*.scss', gulp.series('sass'));
+      gulp.watch('./source/*.jade', gulp.series('jade'));
+      gulp.watch('./source/js/**/*.js', gulp.series('babel'));
+      done();
+    }
   )
 );
 
@@ -125,13 +136,15 @@ gulp.task('default',
 gulp.task('build',
   gulp.series(
     'clean',
-    gulp.parallel(
-      'jade',
-      'sass', 
-      'babel',
-    )
+    gulp.parallel( 'jade', 'sass', 'babel',)
   )
 )
+
+/* 
+
+如果有載入 bower、imagemin，可以參考下列放置位置
+
+*/ 
 
 // gulp.task('build',
 //   gulp.series(
